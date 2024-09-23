@@ -21,40 +21,47 @@ namespace InnoMasketss.Controllers
 
         public IActionResult Index(string categoria, string buscar, int? pagina)
         {
-            var post = new List<Post>();
-            if (string.IsNullOrEmpty(categoria) && string.IsNullOrEmpty(buscar))
-                post = _postServicio.ObtenerPosts();
-            else if (!string.IsNullOrEmpty(categoria))
+            try
             {
-                // Que categoria nosea nula
-                var categoriaEnum = Enum.Parse<CategoriaEnum>(categoria);
-                post = _postServicio.ObtenerPostsCategoria(categoriaEnum);
+                var post = new List<Post>();
+                if (string.IsNullOrEmpty(categoria) && string.IsNullOrEmpty(buscar))
+                    post = _postServicio.ObtenerPosts();
+                else if (!string.IsNullOrEmpty(categoria))
+                {
+                    // Que categoria nosea nula
+                    var categoriaEnum = Enum.Parse<CategoriaEnum>(categoria);
+                    post = _postServicio.ObtenerPostsCategoria(categoriaEnum);
 
-                if (post.Count == 0)
-                    ViewBag.Error = $"No se encontraron publicaciones en la categoria {categoriaEnum}.";
+                    if (post.Count == 0)
+                        ViewBag.Error = $"No se encontraron publicaciones en la categoria {categoriaEnum}.";
 
 
+                }
+                else if (!string.IsNullOrEmpty(buscar))
+                {
+                    // Que buscar nosea nulo
+                    //Buscar Por titulo
+                    post = _postServicio.ObtenerPostsTitulo(buscar);
+                    if (post.Count == 0)
+                        ViewBag.Error = $"Nose encontraron publicaciones en la categoria {buscar}.";
+
+
+
+                }
+                //Muestra cantidad por pagina
+                int pageSize = 6;
+                int pageNumber = (pagina ?? 1);
+
+                string descripcioncategoria = !string.IsNullOrEmpty(categoria) ? CategoriaEnumHelper.ObtenerDescripcion(Enum.Parse<CategoriaEnum>(categoria)) : "Todas las demas";
+                ViewBag.CategoriaDescripcion = descripcioncategoria;
+
+                return View(post.ToPagedList(pageNumber, pageSize));
             }
-            else if (!string.IsNullOrEmpty(buscar))
+            catch (System.Exception ex)
             {
-                // Que buscar nosea nulo
-                //Buscar Por titulo
-                post = _postServicio.ObtenerPostsTitulo(buscar);
-                if (post.Count == 0)
-                    ViewBag.Error = $"Nose encontraron publicaciones en la categoria {buscar}.";
-
-
-
+                ViewBag.Error = ex.Message;
+                return View();
             }
-            //Muestra cantidad por pagina
-            int pageSize = 6;
-            int pageNumber = (pagina ?? 1);
-
-            string descripcioncategoria =!string.IsNullOrEmpty(categoria) ? CategoriaEnumHelper.ObtenerDescripcion(Enum.Parse<CategoriaEnum>(categoria)) : "Todas las demas";
-            ViewBag.CategoriaDescripcion = descripcioncategoria;
-
-            return View(post.ToPagedList(pageNumber, pageSize));
-
         }
     }
 }

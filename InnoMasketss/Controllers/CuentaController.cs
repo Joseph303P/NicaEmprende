@@ -128,11 +128,18 @@ namespace InnoMasketss.Controllers
         //Si ya esta autenticado
         public IActionResult Login()
         {
-            ClaimsPrincipal c = HttpContext.User;
-            if (c.Identity != null)
+            try
             {
-                if (c.Identity.IsAuthenticated)
-                    return RedirectToAction("Index", "Home");
+                ClaimsPrincipal c = HttpContext.User;
+                if (c.Identity != null)
+                {
+                    if (c.Identity.IsAuthenticated)
+                        return RedirectToAction("Index", "Home");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
             }
             return View();
         }

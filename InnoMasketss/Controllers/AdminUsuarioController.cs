@@ -23,39 +23,52 @@ namespace InnoMasketss.Controllers
 
         public IActionResult Index(string buscar, int? pagina)
         {
-            var usuarios = _usuarioServicio.ListarUsuarios();
-            if (!String.IsNullOrEmpty(buscar))
-
-                //Buscar mediante el correo o Nombre de usuario
-                usuarios = usuarios.Where(u => u.Correo != null && u.Correo.Contains(buscar) || u.NombreUsuario != null && u.NombreUsuario.Contains(buscar)).ToList();
-            usuarios = usuarios.OrderBy(u => u.NombreUsuario).ToList();
-
-            List<SelectListItem> roles = _usuarioServicio.ListarRoles().Select(r => new SelectListItem
+            try
             {
-                //Se mostrara su rol ya sea administrador o usuario
-                Value = r.RolId.ToString(),
-                Text = r.Nombre
-            }).ToList();
-            ViewBag.Roles = roles;
+                var usuarios = _usuarioServicio.ListarUsuarios();
+                if (!String.IsNullOrEmpty(buscar))
 
-            int pageSize = 10;
-            int pageNumber = (pagina ?? 1);  //si no re asigna ningun numerode pagina se establecera a la pagina 1
-            var usuariospaginados = usuarios.ToPagedList(pageNumber, pageSize);
+                    //Buscar mediante el correo o Nombre de usuario
+                    usuarios = usuarios.Where(u => u.Correo != null && u.Correo.Contains(buscar) || u.NombreUsuario != null && u.NombreUsuario.Contains(buscar)).ToList();
+                usuarios = usuarios.OrderBy(u => u.NombreUsuario).ToList();
 
-            return View(usuariospaginados);  //Datos ya actualizados
+                List<SelectListItem> roles = _usuarioServicio.ListarRoles().Select(r => new SelectListItem
+                {
+                    //Se mostrara su rol ya sea administrador o usuario
+                    Value = r.RolId.ToString(),
+                    Text = r.Nombre
+                }).ToList();
+                ViewBag.Roles = roles;
 
+                int pageSize = 10;
+                int pageNumber = (pagina ?? 1);  //si no re asigna ningun numerode pagina se establecera a la pagina 1
+                var usuariospaginados = usuarios.ToPagedList(pageNumber, pageSize);
+
+                return View(usuariospaginados);  //Datos ya actualizados
+            }
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
         }
 
         public IActionResult Create()
         {
-            //Lista desplegable de roles
-            List<SelectListItem> roles = _usuarioServicio.ListarRoles().Select(r => new SelectListItem
+            try
             {
-                Value = r.RolId.ToString(),
-                Text = r.Nombre
-            }).ToList();
-            ViewBag.Roles = roles;
-
+                //Lista desplegable de roles
+                List<SelectListItem> roles = _usuarioServicio.ListarRoles().Select(r => new SelectListItem
+                {
+                    Value = r.RolId.ToString(),
+                    Text = r.Nombre
+                }).ToList();
+                ViewBag.Roles = roles;
+            }
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+            }
             return View();
         }
 
@@ -95,18 +108,26 @@ namespace InnoMasketss.Controllers
 
         public IActionResult Edit(int id)
         {
-            var usuario = _usuarioServicio.ObtenerUsuarioId(id);
-            if (usuario == null)
-                return NotFound();
-
-            List<SelectListItem> roles = _usuarioServicio.ListarRoles().Select(r => new SelectListItem
+            try
             {
-                Value = r.RolId.ToString(),
-                Text = r.Nombre
-            }).ToList();
-            ViewBag.Roles = roles;
+                var usuario = _usuarioServicio.ObtenerUsuarioId(id);
+                if (usuario == null)
+                    return NotFound();
 
-            return View(usuario);
+                List<SelectListItem> roles = _usuarioServicio.ListarRoles().Select(r => new SelectListItem
+                {
+                    Value = r.RolId.ToString(),
+                    Text = r.Nombre
+                }).ToList();
+                ViewBag.Roles = roles;
+
+                return View(usuario);
+            }
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
         }
 
         [HttpPost]
@@ -144,11 +165,20 @@ namespace InnoMasketss.Controllers
 
         public IActionResult Delete(int id)
         {
-            var usuario = _usuarioServicio.ObtenerUsuarioId(id);
-            if (usuario == null)
-                return NotFound();
+            try
+            {
+                var usuario = _usuarioServicio.ObtenerUsuarioId(id);
+                if (usuario == null)
+                    return NotFound();
 
-            return View(usuario);
+                return View(usuario);
+            }
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+
+            }
         }
 
         [HttpPost, ActionName("Delete")]

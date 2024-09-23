@@ -4,6 +4,13 @@
     ViewData["Title"] = "Nueva publicacion";
 }
 
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-info" role="alert">
+        @ViewBag.Error
+    </div>
+}
+
 <h2 class="mb-4">Nueva Publicacion</h2>
 <form asp-action="Create" method="post">
     <div class="form-group mb-4">

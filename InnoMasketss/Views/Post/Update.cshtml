@@ -4,6 +4,13 @@
     ViewData["Title"] = "Editar publicacion";
 }
 
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-info" role="alert">
+        @ViewBag.Error
+    </div>
+}
+
 <h2 class="mb-4">Editar Publicacion</h2>
 <form asp-action="Update" method="post">
     <input asp-for="PostId" type="hidden"/>

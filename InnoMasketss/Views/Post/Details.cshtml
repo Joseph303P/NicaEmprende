@@ -1,5 +1,12 @@
 ﻿@model InnoMasketss.Models.ViewModels.PostDetalleViewModels
 
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-info" role="alert">
+        @ViewBag.Error
+    </div>
+}
+
 @if (Model.Post!=null && User.Identity!=null)
 {
     ViewData["Title"] = Model.Post.Titulo;

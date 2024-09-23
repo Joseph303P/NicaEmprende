@@ -33,31 +33,46 @@ namespace InnoMasketss.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Create(Post post)
         {
-            using (var connection = new SqlConnection(_contexto.Conexion))
+            try
             {
-                connection.Open();
-                using (var command = new SqlCommand("IngresarPost", connection))
+                using (var connection = new SqlConnection(_contexto.Conexion))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@Titulo", post.Titulo);
-                    command.Parameters.AddWithValue("@Contenido", post.Contenido);
-                    command.Parameters.AddWithValue("@Categoria", post.Categoria.ToString());
-                    DateTime fc = DateTime.UtcNow;
-                    command.Parameters.AddWithValue("@FechaCreacion", fc);
-                    command.ExecuteNonQuery();
+                    connection.Open();
+                    using (var command = new SqlCommand("IngresarPost", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@Titulo", post.Titulo);
+                        command.Parameters.AddWithValue("@Contenido", post.Contenido);
+                        command.Parameters.AddWithValue("@Categoria", post.Categoria.ToString());
+                        DateTime fc = DateTime.UtcNow;
+                        command.Parameters.AddWithValue("@FechaCreacion", fc);
+                        command.ExecuteNonQuery();
+                    }
+
                 }
 
+                return RedirectToAction("Index", "Home");
             }
-
-            return RedirectToAction("Index", "Home");
-
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
         }
 
         [Authorize(Roles = "Administrador")]
         public IActionResult Update(int id)
         {
-            var post = _postServicio.ObtenerPostPorId(id);
-            return View(post);
+            try
+            {
+                var post = _postServicio.ObtenerPostPorId(id);
+                return View(post);
+            }
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
         }
 
         //Funciona para actualizar un post identificandolo por id
@@ -65,64 +80,86 @@ namespace InnoMasketss.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Update(Post post)
         {
-            using (var connection = new SqlConnection(_contexto.Conexion))
+            try
             {
-                connection.Open();
-                using (var command = new SqlCommand("ActualizarPost", connection))
+                using (var connection = new SqlConnection(_contexto.Conexion))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@PostId", post.PostId);
-                    command.Parameters.AddWithValue("@Titulo", post.Titulo);
-                    command.Parameters.AddWithValue("@Contenido", post.Contenido);
-                    command.Parameters.AddWithValue("@Categoria", post.Categoria.ToString());
-                    command.ExecuteNonQuery();
+                    connection.Open();
+                    using (var command = new SqlCommand("ActualizarPost", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@PostId", post.PostId);
+                        command.Parameters.AddWithValue("@Titulo", post.Titulo);
+                        command.Parameters.AddWithValue("@Contenido", post.Contenido);
+                        command.Parameters.AddWithValue("@Categoria", post.Categoria.ToString());
+                        command.ExecuteNonQuery();
+                    }
+
                 }
 
+                return RedirectToAction("Index", "Home");
             }
-
-            return RedirectToAction("Index", "Home");
-
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
         }
         //Este controlador elimina post identificandolo por su id
         [HttpPost]
         [Authorize(Roles = "Administrador")]
         public IActionResult Delete(int id)
         {
-            using (var connection = new SqlConnection(_contexto.Conexion))
+            try
             {
-                connection.Open();
-                using (var command = new SqlCommand("EliminarPost", connection))
+                using (var connection = new SqlConnection(_contexto.Conexion))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@PostId", id);
-                    command.ExecuteNonQuery();
+                    connection.Open();
+                    using (var command = new SqlCommand("EliminarPost", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@PostId", id);
+                        command.ExecuteNonQuery();
+                    }
+
                 }
 
+                return RedirectToAction("Index", "Home");
             }
-
-            return RedirectToAction("Index", "Home");
-
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
         }
         //Controlador que nos permite llamar a la publicacion mediante su idenficador
         //se muestra la informacion detallada de un pos mas comentarios asociados
         public IActionResult Details(int id)
         {
-            var post = _postServicio.ObtenerPostPorId(id);
-            var Comentario = _postServicio.ObtenerComentariosPorPostId(id);
-            Comentario = _postServicio.ObtenerComentariosHijos(Comentario);
-            Comentario = _postServicio.ObtenerComentariosNietos(Comentario);
-
-            //
-            var models = new PostDetalleViewModels
+            try
             {
-                Post = post,
-                ComentariosPrincipales = Comentario.Where(c => c.ComentarioPrincipalId == null && c.ComentarioTerciariosId == null).ToList(),
-                ComentariosHijos = Comentario.Where(c => c.ComentarioPrincipalId! == null && c.ComentarioTerciariosId == null).ToList(),
-                ComentariosNietos = Comentario.Where(c => c.ComentarioTerciariosId != null).ToList(),
-                PostRecientes = _postServicio.ObtenerPosts().Take(10).ToList()
-            };
-               
-            return View(models);
+                var post = _postServicio.ObtenerPostPorId(id);
+                var Comentario = _postServicio.ObtenerComentariosPorPostId(id);
+                Comentario = _postServicio.ObtenerComentariosHijos(Comentario);
+                Comentario = _postServicio.ObtenerComentariosNietos(Comentario);
+
+                //
+                var models = new PostDetalleViewModels
+                {
+                    Post = post,
+                    ComentariosPrincipales = Comentario.Where(c => c.ComentarioPrincipalId == null && c.ComentarioTerciariosId == null).ToList(),
+                    ComentariosHijos = Comentario.Where(c => c.ComentarioPrincipalId! == null && c.ComentarioTerciariosId == null).ToList(),
+                    ComentariosNietos = Comentario.Where(c => c.ComentarioTerciariosId != null).ToList(),
+                    PostRecientes = _postServicio.ObtenerPosts().Take(10).ToList()
+                };
+
+                return View(models);
+            }
+            catch (System.Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
         }
 
         //Controlador que permite comentar en las publicaciones
